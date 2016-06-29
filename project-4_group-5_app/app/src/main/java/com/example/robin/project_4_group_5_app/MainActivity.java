@@ -1,5 +1,6 @@
 package com.example.robin.project_4_group_5_app;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,7 +9,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TabHost;
+import android.os.Vibrator;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -62,8 +65,52 @@ public class MainActivity extends AppCompatActivity {
 
     public void secondHomeBttonClick(View view)
     {
-        setContentView(R.layout.layoutfile);
+        setContentView(R.layout.tabbedgraph);
         initializeTabs();
+        initializeGraphs();
+    }
+
+    private void initializeGraphs()
+    {
+        GraphView graph1 = (GraphView) findViewById(R.id.screen_1_chart_1);
+        GraphView graph2 = (GraphView) findViewById(R.id.screen_1_chart_2);
+        GraphView graph3 = (GraphView) findViewById(R.id.screen_1_chart_3);
+
+        LineGraphSeries<DataPoint> series1 = new LineGraphSeries<DataPoint>(new DataPoint[] {
+                new DataPoint(0, 1),
+                new DataPoint(1, 5),
+                new DataPoint(2, 3),
+                new DataPoint(3, 2),
+                new DataPoint(4, 6)
+        });
+
+        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<DataPoint>(new DataPoint[] {
+                new DataPoint(0, 1),
+                new DataPoint(1, 3),
+                new DataPoint(2, 3),
+                new DataPoint(3, 7),
+                new DataPoint(4, 5),
+                new DataPoint(5, 6),
+                new DataPoint(6, 4),
+                new DataPoint(7, 1),
+                new DataPoint(8, 9),
+        });
+
+        LineGraphSeries<DataPoint> series3 = new LineGraphSeries<DataPoint>(new DataPoint[] {
+                new DataPoint(0, 5),
+                new DataPoint(1, 8),
+                new DataPoint(2, 0),
+                new DataPoint(3, 0),
+                new DataPoint(4, 8)
+        });
+        graph1.addSeries(series1);
+        graph2.addSeries(series2);
+        graph3.addSeries(series3);
+    }
+
+    public void returnButtonTabbed(View view)
+    {
+        setContentView(R.layout.content_main);
     }
 
     public void OnBackButton(View view)
