@@ -2,10 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.robin.project_4_group_5_app">
 
+<<<<<<< HEAD
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+=======
+>>>>>>> parent of af0ca6d... changes to project structure, added graphs to tabs
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

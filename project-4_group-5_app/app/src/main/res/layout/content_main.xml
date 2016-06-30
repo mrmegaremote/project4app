@@ -41,6 +41,10 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="49dp"
+<<<<<<< HEAD
         android:onClick="secondHomeButtonClick" />
 
+=======
+        android:onClick="secondHomeBttonClick" />
+>>>>>>> parent of af0ca6d... changes to project structure, added graphs to tabs
 </RelativeLayout>
