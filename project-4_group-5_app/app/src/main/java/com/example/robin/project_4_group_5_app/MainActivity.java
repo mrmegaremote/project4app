@@ -43,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String JSON_URL = "http://188.166.26.149/userstory1.php?querynum=";
 
-    private static final String TAG_AMOUNT="amount";
-    private static final String TAG_BOROUGH="borough";
-
     JSONArray userstory2 = null;
 
     ArrayList<HashMap<String, String>> theftList;
@@ -103,9 +100,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void secondHomeButtonClick(View view)
     {
-        setContentView(R.layout.tabbedgraph);
-        initializeTabs();
         initializeGraphs("1");
+        initializeTabs();
     }
 
     private void initializeJSON(String userstoryQueryNumber) {
@@ -154,9 +150,9 @@ public class MainActivity extends AppCompatActivity {
                 super.onPostExecute(s);
                 loading.dismiss();
                 Toast.makeText(MainActivity.this, s, Toast.LENGTH_LONG).show();
-//                Intent intent = new Intent(this, ParseJSON.class);
-//                intent.putExtra(MY_JSON,s);
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, ParseJSON.class);
+                intent.putExtra(MY_JSON,s);
+                startActivity(intent);
             }
         }
         GetJSON gj = new GetJSON();
