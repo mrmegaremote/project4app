@@ -1,6 +1,8 @@
 package com.example.robin.project_4_group_5_app;
 
-import android.content.Context;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,19 +12,55 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TabHost;
-import android.os.Vibrator;
+import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 
 public class MainActivity extends AppCompatActivity {
+
+//    private int userstoryQueryNumber;
+
+    public static final String MY_JSON ="MY_JSON";
+
+    private static final String JSON_URL = "http://188.166.26.149/userstory1.php?querynum=";
+
+    private static final String TAG_AMOUNT="amount";
+    private static final String TAG_BOROUGH="borough";
+
+    JSONArray userstory2 = null;
+
+    ArrayList<HashMap<String, String>> theftList;
+
+    ListView listView;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        theftList = new ArrayList<HashMap<String, String>>();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -63,54 +101,136 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.screen_1);
     }
 
-    public void secondHomeBttonClick(View view)
+    public void secondHomeButtonClick(View view)
     {
         setContentView(R.layout.tabbedgraph);
         initializeTabs();
-        initializeGraphs();
+        initializeGraphs("1");
     }
 
-    private void initializeGraphs()
+    private void initializeJSON(String userstoryQueryNumber) {
+        getJSON(JSON_URL ,userstoryQueryNumber);
+    }
+
+    private void getJSON(String url, String userstoryQueryNumber) {
+        class GetJSON extends AsyncTask<String, Void, String>{
+            ProgressDialog loading;
+
+            @Override
+            protected void onPreExecute(){
+                super.onPreExecute();
+                loading = ProgressDialog.show(MainActivity.this, "Wan moment...", null, true, true);
+            }
+
+            @Override
+            protected String doInBackground(String... params) {
+
+                String uri = params[0];
+
+                BufferedReader bufferedReader = null;
+
+                try{
+                    URL url = new URL(uri);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    StringBuilder sb = new StringBuilder();
+
+                    bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+                    String json;
+                    while((json = bufferedReader.readLine()) != null){
+                        sb.append(json+"\n");
+                    }
+
+                    return sb.toString().trim();
+
+                } catch(Exception e){
+                    Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
+                    return e.toString();
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String s){
+                super.onPostExecute(s);
+                loading.dismiss();
+                Toast.makeText(MainActivity.this, s, Toast.LENGTH_LONG).show();
+//                Intent intent = new Intent(this, ParseJSON.class);
+//                intent.putExtra(MY_JSON,s);
+//                startActivity(intent);
+            }
+        }
+        GetJSON gj = new GetJSON();
+        String newurl = url.concat(userstoryQueryNumber);
+        gj.execute(newurl);
+    }
+
+    private void initializeGraphs(String userstoryQueryNumber)
     {
-        GraphView graph1 = (GraphView) findViewById(R.id.screen_1_chart_1);
-        GraphView graph2 = (GraphView) findViewById(R.id.screen_1_chart_2);
-        GraphView graph3 = (GraphView) findViewById(R.id.screen_1_chart_3);
+        initializeJSON(userstoryQueryNumber);
 
-        LineGraphSeries<DataPoint> series1 = new LineGraphSeries<DataPoint>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6)
-        });
 
-        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<DataPoint>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 3),
-                new DataPoint(2, 3),
-                new DataPoint(3, 7),
-                new DataPoint(4, 5),
-                new DataPoint(5, 6),
-                new DataPoint(6, 4),
-                new DataPoint(7, 1),
-                new DataPoint(8, 9),
-        });
+        LineChart graphStolenBikes = (LineChart) findViewById(R.id.graphStolenBikes);
+        BarChart graphContainers = (BarChart) findViewById(R.id.graphContainers);
+        BarChart graphCombi = (BarChart) findViewById(R.id.graphCombi);
 
-        LineGraphSeries<DataPoint> series3 = new LineGraphSeries<DataPoint>(new DataPoint[] {
-                new DataPoint(0, 5),
-                new DataPoint(1, 8),
-                new DataPoint(2, 0),
-                new DataPoint(3, 0),
-                new DataPoint(4, 8)
-        });
-        graph1.addSeries(series1);
-        graph2.addSeries(series2);
-        graph3.addSeries(series3);
+        graphStolenBikes.setTouchEnabled(true);
+        graphContainers.setTouchEnabled(true);
+        graphCombi.setTouchEnabled(true);
+
+        //ArrayList<Entry>          Lijst met Entries/punten die later gekoppeld worden tot een line.
+
+        ArrayList<Entry> dataStolenBikes1 = new ArrayList<Entry>();
+        ArrayList<Entry> dataStolenBikes2 = new ArrayList<Entry>();
+
+        //Entry                     1 punt binnen een ArrayList<Entry> / line.
+        //Entry(int WaardeOpY-axis, int WaarOpX-axis)
+
+        Entry entryStolenBikes1 = new Entry(12, 0);
+        dataStolenBikes1.add(entryStolenBikes1);
+        Entry entryStolenBikes2 = new Entry(14, 1);
+        dataStolenBikes1.add(entryStolenBikes2);
+
+        Entry entryStolenBikes3 = new Entry(15, 0);
+        dataStolenBikes2.add(entryStolenBikes3);
+        Entry entryStolenBikes4 = new Entry(10, 1);
+        dataStolenBikes2.add(entryStolenBikes4);
+
+        //LineDataSet               Verbindt de alle punten binnen de ArrayList<Entry> aan elkaar
+        //                          en geeft de line een naam en kleur in de legenda.
+
+        LineDataSet lineDataSetStolenBikes1 = new LineDataSet(dataStolenBikes1, "Company 1");
+        lineDataSetStolenBikes1.setAxisDependency(YAxis.AxisDependency.LEFT);
+        LineDataSet lineDataSetStolenBikes2 = new LineDataSet(dataStolenBikes2, "Company 2");
+        lineDataSetStolenBikes1.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        //ArrayList<ILineDataSet>   Verzamelt alle lines bij elkaar als 1 line dataset.
+
+        ArrayList<ILineDataSet> dataSetsStolenBikes = new ArrayList<ILineDataSet>();
+        dataSetsStolenBikes.add(lineDataSetStolenBikes1);
+        dataSetsStolenBikes.add(lineDataSetStolenBikes2);
+
+        //ArrayList<String> xVals   ArrayList met de naam van elke lijn van de X-axis op de grid/graph.
+
+        ArrayList<String> xValsStolenBikes = new ArrayList<String>();
+        xValsStolenBikes.add("1.Q"); xValsStolenBikes.add("2.Q"); xValsStolenBikes.add("3.Q"); xValsStolenBikes.add("4.Q");
+
+        //LineData                  Combinatie van LineDataSet en de X-axis specificaties/eigenschappen.
+
+        LineData dataStolenBikes = new LineData(xValsStolenBikes, dataSetsStolenBikes);
+
+        //XXX.setData(LineData)     Geeft de LineData aan de graph.
+
+        graphStolenBikes.setData(dataStolenBikes);
+
+        //XXX.invalidate()          Updatet de graph om alle wijzingen van gegevens (van hiervoor) door te voeren.
+
+        graphStolenBikes.invalidate();
+
     }
 
     public void returnButtonTabbed(View view)
     {
-        setContentView(R.layout.content_main);
+        setContentView(R.layout.activity_main);
     }
 
     public void OnBackButton(View view)
@@ -152,4 +272,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
